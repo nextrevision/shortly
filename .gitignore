@@ -3,3 +3,7 @@ vendor
 .idea
 *.swp
 *.tgz
+*.tfstate
+*.tfstate.backup
+terraform/.terraform*
+notes.md

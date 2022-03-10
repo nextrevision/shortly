@@ -15,19 +15,37 @@ type Api struct {
 }
 
 func NewApi(service *UrlService) *Api {
-	api := &Api{service: service}
+	api := &Api{
+		service: service,
+		Router:  mux.NewRouter(),
+	}
 
-	// Create http router and register paths
-	r := mux.NewRouter()
-	r.Handle("/metrics", promhttp.Handler()).Methods(http.MethodGet)
-	r.HandleFunc("/", api.ShortenUrlHandler).Methods(http.MethodPost)
-	r.HandleFunc("/{id}", api.RedirectUrlHandler).Methods(http.MethodGet)
-	r.HandleFunc("/echo/{id}", api.EchoHandler).Methods(http.MethodGet)
-	r.Use(httpMetricsMiddleware)
-	r.Use(loggingMiddleware)
-	api.Router = r
+	// Register observability endpoints
+	api.Router.Handle("/-/metrics", promhttp.Handler()).Methods(http.MethodGet)
+	api.Router.HandleFunc("/-/health", api.HealthHandler).Methods(http.MethodGet)
+
+	// Register service endpoints
+	api.Router.HandleFunc("/", api.RootHandler).Methods(http.MethodGet)
+	api.Router.HandleFunc("/", api.ShortenUrlHandler).Methods(http.MethodPost)
+	api.Router.HandleFunc("/{id}", api.RedirectUrlHandler).Methods(http.MethodGet)
+	api.Router.HandleFunc("/echo/{id}", api.EchoHandler).Methods(http.MethodGet)
+
+	// Register middleware
+	api.Router.Use(httpMetricsMiddleware)
+	api.Router.Use(loggingMiddleware)
 
 	return api
+}
+
+// RootHandler could be an extraordinary landing page, but sadly the maintainer hasn't made one yet
+func (a *Api) RootHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("shortly"))
+}
+
+// HealthHandler is used for platform health checks to ensure the service has started
+func (a *Api) HealthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // ShortenUrlHandler receives a form-encoded body in a url="value" format and shortens it and returns a distinct id

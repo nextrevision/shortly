@@ -9,6 +9,20 @@ import (
 	"testing"
 )
 
+func TestHealthHandler(t *testing.T) {
+	req, err := http.NewRequest("GET", "/-/health", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	api := newTestServer()
+
+	w := httptest.NewRecorder()
+	api.Router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNoContent, w.Code, "expected 204 status response")
+}
+
 func TestShortenUrlHandler(t *testing.T) {
 	data := url.Values{}
 	data.Set("url", "http://foo")

@@ -33,3 +33,16 @@ services:
     image: memcached
     ports:
       - 11211:11211
+  shortly:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - 8000:8000
+    environment:
+      SHORTLY_DBUSER: shortly
+      SHORTLY_DBPASS: shortly
+      SHORTLY_DBHOST: postgres
+      SHORTLY_DBNAME: shortly
+      SHORTLY_DBSSLMODE: disable
+      SHORTLY_MEMCACHESERVERS: memcached:11211
