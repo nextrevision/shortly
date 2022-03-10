@@ -17,7 +17,7 @@ const (
 //switching implementations
 type UrlService struct {
 	datastore    DataStore
-	cache        DataStore
+	cache        CacheStore
 	cacheEnabled bool
 }
 
@@ -27,11 +27,15 @@ func NewUrlService(ds DataStore) *UrlService {
 	}
 }
 
-func NewUrlServiceWithCache(ds DataStore, cache DataStore) *UrlService {
+func NewUrlServiceWithCache(ds DataStore, cache CacheStore) *UrlService {
 	service := NewUrlService(ds)
 	service.cacheEnabled = true
 	service.cache = cache
 	return service
+}
+
+func (s *UrlService) GetRecentUrls() ([]UrlMapping, error) {
+	return s.datastore.GetRecentUrls()
 }
 
 func (s *UrlService) SaveUrl(url string) (string, error) {

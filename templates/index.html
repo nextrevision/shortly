@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Shortly - URL Shortener">
+    <title>Shortly</title>
+
+    <link href="https://getbootstrap.com/docs/5.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" href="https://getbootstrap.com/docs/5.1/assets/img/favicons/apple-touch-icon.png"
+          sizes="180x180">
+    <link rel="icon" href="https://getbootstrap.com/docs/5.1/assets/img/favicons/favicon-32x32.png" sizes="32x32"
+          type="image/png">
+    <link rel="icon" href="https://getbootstrap.com/docs/5.1/assets/img/favicons/favicon-16x16.png" sizes="16x16"
+          type="image/png">
+    <link rel="manifest" href="https://getbootstrap.com/docs/5.1/assets/img/favicons/manifest.json">
+    <link rel="mask-icon" href="https://getbootstrap.com/docs/5.1/assets/img/favicons/safari-pinned-tab.svg"
+          color="#7952b3">
+    <link rel="icon" href="https://getbootstrap.com/docs/5.1/assets/img/favicons/favicon.ico">
+    <meta name="theme-color" content="#7952b3">
+
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+
+
+    <!-- Custom styles for this template -->
+    <link href="https://getbootstrap.com/docs/5.1/examples/starter-template/starter-template.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="col-lg-8 mx-auto p-3 py-md-5">
+    <header class="d-flex align-items-center pb-3 mb-5 border-bottom">
+        <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
+            <!--svg class="svg-icon" viewBox="0 0 20 20"-->
+            <div class="fs-2 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-arrow-bar-down" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1 3.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5zM8 6a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L7.5 12.293V6.5A.5.5 0 0 1 8 6z"></path>
+                </svg>
+                <i class="bi bi-arrow-bar-down"></i>
+                Shortly - URL Shortener
+            </div>
+        </a>
+    </header>
+
+    <main>
+        <h1>Shorten a URL</h1>
+        <form id="shorten-form" method="post">
+            <div class="input-group input-group-lg mb-5">
+                <input id="url-input" type="text" class="form-control" aria-label="URL to shorten" aria-describedby="shorten-group" placeholder="https://duckduckgo.com">
+                <button type="submit" class="btn btn-primary btn-lg px-4" aria-describedby="shorten-group">Shorten!</button>
+            </div>
+        </form>
+
+        <hr class="col-12 col-md-12 mb-12">
+
+        <div class="row g-5">
+            <div class="col-md-12">
+                <h2>Recently shortened URLs</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Short</th>
+                            <th scope="col">URL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .RecentUrls}}
+                        <tr>
+                            <td><a href="/{{.Id}}">{{.Id}}</a></td>
+                            <td>{{.Url}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="pt-5 my-5 text-muted border-top">
+        Created by John Patterson &middot; &copy; 2022
+    </footer>
+</div>
+
+<script src="https://getbootstrap.com/docs/5.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    function shortenUrl(event) {
+        event.preventDefault();
+        var inputUrl = document.getElementById("url-input").value
+
+        const xhr = new XMLHttpRequest()
+        xhr.open("POST", "/")
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send("url="+inputUrl);
+
+        xhr.onload = function() {
+            // Update the text
+            document.getElementById("url-input").value = xhr.responseText
+        }
+
+        xhr.onerror = function(event) {
+            console.log("Network error occurred")
+        }
+    }
+
+    // attach event listener
+    var form = document.getElementById("shorten-form");
+    form.addEventListener("submit", shortenUrl, true);
+</script>
+
+</body>
+</html>

@@ -5,6 +5,7 @@ import (
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -25,8 +26,20 @@ var (
 
 // The DataStore interface represents a simple storage format to save and resolve urls
 type DataStore interface {
+	GetRecentUrls() ([]UrlMapping, error)
+	// Composition here works for this use case, but cache
+	//and datastore interfaces likely diverge in real scenarios
+	CacheStore
+}
+
+type CacheStore interface {
 	SaveUrl(id string, url string) error
 	ResolveUrl(id string) (string, error)
+}
+
+type UrlMapping struct {
+	Id  string `db:"id"`
+	Url string `db:"url"`
 }
 
 // Postgres DataStore struct and methods
@@ -38,6 +51,29 @@ func NewPgDataStore(db *sql.DB) *PgDataStore {
 	return &PgDataStore{
 		db: db,
 	}
+}
+
+func (ds *PgDataStore) GetRecentUrls() ([]UrlMapping, error) {
+	rows, err := ds.db.Query(`SELECT id, url FROM urls ORDER BY created DESC LIMIT 10`)
+	if err != nil {
+		dataStoreErrors.WithLabelValues("postgres").Inc()
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	urlMappings := []UrlMapping{}
+	for rows.Next() {
+		var urlMapping UrlMapping
+		if err = rows.Scan(&urlMapping.Id, &urlMapping.Url); err != nil {
+			log.Errorf("unable to map row to struct: %s", err)
+			dataStoreErrors.WithLabelValues("postgres").Inc()
+		}
+
+		urlMappings = append(urlMappings, urlMapping)
+	}
+
+	return urlMappings, nil
 }
 
 func (ds *PgDataStore) SaveUrl(id string, url string) error {
@@ -61,6 +97,7 @@ func (ds *PgDataStore) ResolveUrl(id string) (string, error) {
 	for rows.Next() {
 		var url string
 		if err = rows.Scan(&url); err != nil {
+			log.Errorf("unable to map row to struct: %s", err)
 			dataStoreErrors.WithLabelValues("postgres").Inc()
 		}
 
@@ -123,6 +160,10 @@ func NewMemoryDataStore() *MemoryDataStore {
 	return &MemoryDataStore{
 		urls: map[string]string{},
 	}
+}
+
+func (ds *MemoryDataStore) GetRecentUrls() ([]UrlMapping, error) {
+	return []UrlMapping{}, nil
 }
 
 func (ds *MemoryDataStore) SaveUrl(id string, url string) error {
