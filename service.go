@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -85,7 +86,15 @@ func generateUrlId(url string) (string, error) {
 		randBytes[i] = urlChars[rand.Intn(len(urlChars))]
 	}
 
+	// base64 encode the url
 	urlEncoded := base64.StdEncoding.EncodeToString([]byte(url))
-	urlIdSuffix := string([]byte(urlEncoded)[:idDeterministicLength])
+	// remove all occurrences of '=' common in base64 strings
+	urlEncoded = strings.Replace(urlEncoded, "=", "", -1)
+	// take the last n number of characters from the string
+	indexStart := len(urlEncoded) - idDeterministicLength
+	if len(urlEncoded) < idDeterministicLength {
+		indexStart = len(urlEncoded)
+	}
+	urlIdSuffix := string([]byte(urlEncoded)[indexStart:])
 	return fmt.Sprintf("%s%s", randBytes, urlIdSuffix), nil
 }
