@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: shortly-schema
+      author: john.patterson
+      changes:
+        - createTable:
+            tableName: urls
+            columns:
+              - column:
+                  name: id
+                  type: varchar(100)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: url
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created
+                  type: timestamp(3)
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: true

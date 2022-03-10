@@ -1,0 +1,35 @@
+version: '3.2'
+services:
+  postgres:
+    image: postgres:12
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: shortly
+      POSTGRES_USER: shortly
+      POSTGRES_PASSWORD: shortly
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "shortly", "-U", "shortly"]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    volumes:
+      - ./:/app
+  liquibase-postgres:
+    image: liquibase/liquibase:4.4
+    restart: "no"
+    command:
+      - --url=jdbc:postgresql://postgres:5432/shortly?currentSchema=public
+      - --changelog-file=changelog.yml
+      - --username=shortly
+      - --password=shortly
+      - update
+    volumes:
+      - ./etc/liquibase:/liquibase/changelog
+    depends_on:
+      - postgres
+  memcached:
+    image: memcached
+    ports:
+      - 11211:11211
