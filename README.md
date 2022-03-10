@@ -38,7 +38,7 @@ curl -vvv -L localhost:8000/{id}
 
 | Path         | Method | Description                                                                                                                                                                       |
 |--------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `/`          | `GET`  | Very impressive landing page.                                                                                                                                                     |
+| `/`          | `GET`  | Basic landing page demonstrating functionality.                                                                                                                                   |
 | `/`          | `POST` | Shortens a supplied URL and returns a plain text "shortened" URL. Accepts `application/x-www-form-urlencoded` content with the `url` form key set to the URL you wish to shorten. |
 | `/{id}`      | `GET`  | Resolves a shortened URL to it's intended destination and responds with a redirect to the location.                                                                               |
 | `/echo/{id}` | `GET`  | Used to test the shorten and redirect workflows. It merely echos the `id` supplied.                                                                                               |
