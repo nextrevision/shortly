@@ -4,7 +4,7 @@ variable "port" {
 }
 
 variable "container_image" {
-  default     = "docker.io/nextrevision/shortly:9d93c3e77545256e1b9ecc30aaa2738d25c8c164"
+  default     = "docker.io/nextrevision/shortly:448550ada46c5d16b3ca38510355214827003762"
   description = "Name of the container image to use including tag"
 }
 
