@@ -43,7 +43,7 @@ resource "aws_ecs_task_definition" "shortly" {
   container_definitions    = jsonencode([
     {
       name        = "${local.name}-container"
-      image       = "${var.container_image}:latest"
+      image       = "${var.container_image}"
       essential   = true
       healthCheck = {
         command = ["CMD-SHELL", "wget -O /dev/null -q localhost:${var.port}${var.health_check_path} || exit 1"]

@@ -26,4 +26,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: nextrevision/shortly:latest
+          tags: nextrevision/shortly:latest,nextrevision/shortly:${{ github.sha }}
