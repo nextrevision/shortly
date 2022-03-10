@@ -5,18 +5,21 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
+	"html/template"
 	"net/http"
 )
 
 // The Api struct is the primary entrypoint for routing and handling HTTP requests
 type Api struct {
 	Router  *mux.Router
+	tmpl    *template.Template
 	service *UrlService
 }
 
 func NewApi(service *UrlService) *Api {
 	api := &Api{
 		service: service,
+		tmpl:    template.Must(template.ParseFiles("templates/index.html")),
 		Router:  mux.NewRouter(),
 	}
 
@@ -37,10 +40,24 @@ func NewApi(service *UrlService) *Api {
 	return api
 }
 
-// RootHandler could be an extraordinary landing page, but sadly the maintainer hasn't made one yet
+// RootHandler renders a simple web frontend
 func (a *Api) RootHandler(w http.ResponseWriter, r *http.Request) {
+	type LandingPageData struct {
+		RecentUrls []UrlMapping
+	}
+
+	recentUrls, err := a.service.GetRecentUrls()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	data := LandingPageData{
+		RecentUrls: recentUrls,
+	}
+
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("shortly"))
+	a.tmpl.Execute(w, data)
 }
 
 // HealthHandler is used for platform health checks to ensure the service has started

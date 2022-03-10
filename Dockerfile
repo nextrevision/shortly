@@ -20,12 +20,13 @@ RUN go build -o /shortly
 ##
 FROM alpine:latest
 
-WORKDIR /
+WORKDIR /app
 
-COPY --from=build /shortly /shortly
+COPY --from=build /shortly /app/shortly
+COPY templates /app/templates
 
 EXPOSE 8000
 
 USER nobody:nobody
 
-ENTRYPOINT ["/shortly"]
+ENTRYPOINT ["/app/shortly"]
